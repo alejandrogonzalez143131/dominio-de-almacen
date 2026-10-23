@@ -1,0 +1,1 @@
+# dominio-de-almacen
