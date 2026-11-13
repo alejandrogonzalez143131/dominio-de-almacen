@@ -63,7 +63,15 @@
 
 <div id="appContent" class="hidden">
     <div class="notice"><b>Versión inicial:</b> esta versión guarda los exámenes y resultados en el navegador actual. Para reunir resultados de distintos participantes y dispositivos, después conectaremos una base de datos.</div>
-<nav class="tabs"><button class="tab active" data-tab="crear">Crear examen</button><button class="tab" data-tab="aplicar">Aplicar examen</button><button class="tab" data-tab="resultados">Resultados</button><button class="tab" data-tab="archivos">Importar / exportar</button></nav>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+  <nav class="tabs">
+    <button class="tab active" data-tab="crear">Crear examen</button>
+    <button class="tab" data-tab="aplicar">Aplicar examen</button>
+    <button class="tab" data-tab="resultados">Resultados</button>
+    <button class="tab" data-tab="archivos">Importar / exportar</button>
+  </nav>
+  <button type="button" id="logoutBtn" class="danger">Cerrar sesión</button>
+</div>
 <section id="crear" class="tabcontent">
 <div class="panel"><div class="between"><h2>Mis exámenes guardados</h2><span id="examTotal" class="pill">0 exámenes</span></div><p class="small">Consulta, edita, aplica o elimina los exámenes guardados en este navegador.</p><div id="examList"></div></div>
 <div class="panel"><h2>Datos del examen</h2><div class="grid">
@@ -149,6 +157,24 @@ $('loginForm').addEventListener('submit', async (e) => {
   const password = $('loginPassword').value;
 
   await iniciarSesion(email, password);
+});
+$('logoutBtn').addEventListener('click', async () => {
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    $('loginMsg').textContent = 'No se pudo cerrar sesión: ' + error.message;
+    return;
+  }
+
+  usuarioActual = null;
+  perfilActual = null;
+
+  $('appContent').classList.add('hidden');
+  $('resetPasswordPanel').classList.add('hidden');
+  $('loginPanel').classList.remove('hidden');
+
+  $('loginPassword').value = '';
+  $('loginMsg').textContent = 'Sesión cerrada correctamente.';
 });
 $('forgotPassword').addEventListener('click', async () => {
   const email = $('loginEmail').value.trim();
