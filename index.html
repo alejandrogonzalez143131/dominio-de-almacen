@@ -135,6 +135,8 @@ async function iniciarSesion(email, password) {
 
   $('loginPanel').classList.add('hidden');
   $('appContent').classList.remove('hidden');
+
+  aplicarPermisosInterfaz();
 }
 
 
@@ -258,7 +260,47 @@ function saveExam(){
 }
 function metaRead(){exam.title=$('title').value.trim();exam.area=$('area').value.trim();exam.pass=Math.min(100,Math.max(0,Number($('pass').value)||0));exam.instructions=$('instructions').value.trim()}
 function metaFill(){$('title').value=exam.title||'';$('area').value=exam.area||'';$('pass').value=exam.pass??80;$('instructions').value=exam.instructions||''}
-function tab(id){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.querySelectorAll('.tabcontent').forEach(s=>s.classList.toggle('hidden',s.id!==id));if(id==='aplicar')preview();if(id==='resultados')showResults();if(id==='archivos')summary()}
+
+function aplicarPermisosInterfaz() {
+  const esAdministrador = perfilActual?.rol === 'administrador';
+
+  ['crear', 'resultados', 'archivos'].forEach(id => {
+    const boton = document.querySelector(`.tab[data-tab="${id}"]`);
+    const seccion = $(id);
+
+    if (boton) {
+      boton.classList.toggle('hidden', !esAdministrador);
+    }
+
+    if (!esAdministrador && seccion) {
+      seccion.classList.add('hidden');
+    }
+  });
+
+  tab(esAdministrador ? 'crear' : 'aplicar');
+}
+
+function tab(id) {
+  if (!perfilActual) return;
+
+  const esAdministrador = perfilActual.rol === 'administrador';
+
+  if (!esAdministrador && id !== 'aplicar') {
+    id = 'aplicar';
+  }
+
+  document.querySelectorAll('.tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === id);
+  });
+
+  document.querySelectorAll('.tabcontent').forEach(s => {
+    s.classList.toggle('hidden', s.id !== id);
+  });
+
+  if (id === 'aplicar') preview();
+  if (id === 'resultados') showResults();
+  if (id === 'archivos') summary();
+}
 function activateExam(id,destination){
   const found=exams.find(e=>e.id===id); if(!found)return;
   exam=JSON.parse(JSON.stringify(found)); metaFill(); editor(); preview(); summary();
